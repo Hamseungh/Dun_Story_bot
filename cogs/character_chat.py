@@ -127,21 +127,25 @@ class CharacterChat(commands.Cog):
 
     @commands.Cog.listener('on_message')
     async def relay(self, message: discord.Message):
-        if not message.guild or message.author.bot or message.webhook_id or not isinstance(message.channel,discord.TextChannel):
+        if not message.guild or message.author.bot or message.webhook_id or not isinstance(message.channel, (discord.TextChannel, discord.Thread)):
             return
         if not message.content and not message.attachments:
             return
-        identity = await asyncio.to_thread(get_chat_identity,message.guild.id,message.channel.id,message.author.id)
+        # 스레드는 부모 텍스트 채널의 캐릭터 채팅 설정을 상속합니다.
+        parent_channel = message.channel.parent if isinstance(message.channel, discord.Thread) else message.channel
+        if not isinstance(parent_channel, discord.TextChannel):
+            return
+        identity = await asyncio.to_thread(get_chat_identity,message.guild.id,parent_channel.id,message.author.id)
         if not identity:
             return
         key = (message.guild.id,message.channel.id)
         lock = self._locks.setdefault(key,asyncio.Lock())
         async with lock:
             try:
-                hooks = await message.channel.webhooks()
+                hooks = await parent_channel.webhooks()
                 hook = next((h for h in hooks if h.user and h.user.id == self.bot.user.id and h.name == 'Character Chat'),None)
                 if hook is None:
-                    hook = await message.channel.create_webhook(name='Character Chat',reason='캐릭터 채팅')
+                    hook = await parent_channel.create_webhook(name='Character Chat',reason='캐릭터 채팅')
                 files = []
                 for attachment in message.attachments:
                     files.append(await attachment.to_file())
@@ -155,7 +159,8 @@ class CharacterChat(commands.Cog):
                 if content and len(content) > 2000:
                     return
                 await hook.send(content=content,username=identity['name'][:80],
-                                files=files,allowed_mentions=discord.AllowedMentions.none(),wait=True)
+                                files=files,allowed_mentions=discord.AllowedMentions.none(),wait=True,
+                                **({'thread': message.channel} if isinstance(message.channel, discord.Thread) else {}))
                 await message.delete()
             except (discord.HTTPException,discord.Forbidden):
                 log.exception('캐릭터 채팅 전송 실패: guild=%s channel=%s',message.guild.id,message.channel.id)
