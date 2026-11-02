@@ -7,6 +7,13 @@ OPS = {'==', '!=', '>=', '<=', '>', '<'}
 CONDITION_TYPES = {'stat', 'item', 'flag', 'grade', 'job'}
 EFFECT_TYPES = {'hp', 'mental', 'gold', 'exp', 'item_add', 'item_remove', 'flag_set'}
 
+GRADE_RANK = {'F': 0, 'E': 1, 'D': 2, 'C': 3, 'B': 4, 'A': 5, 'S': 6}
+
+def _condition_operands(kind, left, right):
+    if kind == 'grade':
+        return GRADE_RANK[str(left).strip().upper()], GRADE_RANK[str(right).strip().upper()]
+    return left, right
+
 
 def migrate():
     with connect() as db:
@@ -81,6 +88,7 @@ def allowed(db, session, choice_id):
                 left, right = (item['quantity'] if item else 0),int(raw)
             elif kind in ('grade','job'): left, right = member[kind],raw
             else: raise ValueError('지원하지 않는 조건입니다.')
+            left, right = _condition_operands(kind, left, right)
             if _compare(left,op,right):
                 found=True
                 break
@@ -157,6 +165,7 @@ def eligible_actors(db, session, choice_id):
                 left, right = (row['quantity'] if row else 0), int(raw)
             else:
                 left, right = member[kind], raw
+            left, right = _condition_operands(kind, left, right)
             if not _compare(left,op,right):
                 ok = False
                 break

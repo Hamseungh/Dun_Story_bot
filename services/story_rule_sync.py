@@ -41,7 +41,9 @@ def sync():
             if kind=='stat' and target not in STATS: raise ValueError(f'Conditions {n}행: 능력치 이름 오류')
             if kind=='item' and target not in items: raise ValueError(f'Conditions {n}행: 아이템 ID 오류')
             if kind in ('grade','job') and target!=kind: raise ValueError(f'Conditions {n}행: target은 {kind}')
-            if kind in ('grade','job') and op not in ('==','!='): raise ValueError(f'Conditions {n}행: 등급/직군은 ==/!= 전용')
+            if kind=='job' and op not in ('==','!='): raise ValueError(f'Conditions {n}행: 직군은 ==/!= 전용')
+            if kind=='grade' and value.upper() not in ('S','A','B','C','D','E','F'): raise ValueError(f'Conditions {n}행: 등급은 S/A/B/C/D/E/F 중 선택')
+            if kind=='grade': value=value.upper()
             if kind in ('stat','item'):
                 try: int(value)
                 except ValueError: raise ValueError(f'Conditions {n}행: 수치 조건은 정수')

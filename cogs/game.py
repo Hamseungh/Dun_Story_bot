@@ -86,7 +86,7 @@ class StoryPicker(discord.ui.Select):
             embed.add_field(name='스토리', value=story['title'], inline=True)
             embed.add_field(name='세션', value=f'`{session_id}`', inline=True)
             embed.add_field(name='참가 캐릭터', value='아직 참가한 캐릭터가 없습니다.', inline=False)
-            embed.add_field(name='참가 방법', value='이 스레드에서 `/참가 캐릭터이름`을 사용하세요. 생성자도 참가해야 합니다.', inline=False)
+            embed.add_field(name='참가 방법', value='이 스레드에서 `/참가`을 사용하세요. 생성자도 참가해야 합니다.', inline=False)
             embed.set_footer(text='참가 후 /진행으로 스토리를 시작하세요.')
             await thread.send(embed=embed)
             await interaction.followup.send(f'게임 스레드가 생성됐어요: {thread.mention}', ephemeral=True)
