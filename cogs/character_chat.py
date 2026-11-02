@@ -1,5 +1,5 @@
 """Character RP webhook chat, scoped to administrator-approved channels."""
-"""/이미지등록 /캐릭터선택 /캐릭터채팅설정"""
+"""/이미지등록 /헌터선택 /캐릭터채팅설정"""
 
 import asyncio
 import logging
@@ -98,7 +98,7 @@ class CharacterChat(commands.Cog):
             return
         await interaction.followup.send(f'**{char["name"]}**의 채팅 프로필 이미지를 등록했어요.',ephemeral=True)
 
-    @app_commands.command(name='캐릭터선택',description='이 서버에서 채팅할 캐릭터를 선택합니다.')
+    @app_commands.command(name='헌터선택',description='이 서버에서 채팅할 캐릭터를 선택합니다.')
     @app_commands.guild_only()
     @app_commands.describe(캐릭터_이름='등록된 내 캐릭터')
     @app_commands.autocomplete(캐릭터_이름=character_autocomplete)
